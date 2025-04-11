@@ -56,9 +56,9 @@ def open_cam(q1, q2, q3, q6):
                                min_tracking_confidence=0.5)
     print("bp3")
 
-    sw_list = [0]  # (사용 여부 미미함: sw_flag 관련 임시 리스트)
+    sw_list = [0]  
 
-    # 카메라가 열려 있는 동안 계속 루프
+    
     while cap.isOpened() and cap_z.isOpened():
         success, img = cap.read()    # 첫 번째 카메라 프레임
         _, img_z = cap_z.read()      # 두 번째 카메라 프레임
@@ -102,7 +102,7 @@ def open_cam(q1, q2, q3, q6):
                 if q3.qsize() == 0:
                     q3.put(s_flag)
 
-                # 손가락 길이(인덱스, 미들, 링, 리틀) vs 손목(landmark[0]) 비교
+                # 손가락 길이(검지, 중지, 약지, 새끼), 손목(landmark[0]) 
                 index = res.landmark[8]
                 middle = res.landmark[12]
                 ring = res.landmark[16]
@@ -192,7 +192,7 @@ def open_cam(q1, q2, q3, q6):
             indy.disconnect()  # 로봇 연결 해제
             break
 
-    # 종료 시 자원 해제
+    # 종료 
     cap.release()
     cap_z.release()
     cv2.destroyAllWindows()
@@ -267,7 +267,7 @@ def gripper_close():
     print("Gripper Close")
     time.sleep(1)
 
-    # 인형을 집었다고 가정 후 이동 -> 홈 포지션 또는 특정 위치
+    # 캡슐을 집었다고 가정 후 이동 ->  특정 위치
     indy.task_move_to([0, 0.46, 0.32, 0, 180, 44])
     indy.wait_for_move_finish()
     indy.task_move_to([0.1, 0.8, 0.32, -12.95, 166.19, 47.27])
@@ -276,7 +276,7 @@ def gripper_close():
     # 그리퍼 다시 오픈
     gripper_open()
 
-    # 홈 포지션 비슷한 곳으로 이동
+    # 홈 포지션 비슷한 위치로 이동
     indy.task_move_to([0, 0.46, 0.32, 0, 180, 50])
     indy.wait_for_move_finish()
 
@@ -296,10 +296,10 @@ def robot_control(q1, q2, q3, q4, q5, q6, x_line, y_line, z_line):
     print('게임을 시작하려면 흰색 버튼을 눌러주세요')
 
     while True:
-        di_list = indy.get_di()[1]  # 로봇의 디지털 입력(DI) 확인 (0:비어있음, 1:흰색버튼?)
+        di_list = indy.get_di()[1]  # 로봇의 디지털 입력(DI) 확인 (0:비어있음, 1:흰색버튼)
         e_flag = True
 
-        # DI가 감지되면(흰색 버튼 눌림?) 게임 시작
+        # DI가 감지되면(흰색 버튼 눌림) 게임 시작
         if di_list:
             t_flag = True
             q4.put(t_flag)  # 타이머 프로세스에 '시작' 신호
@@ -316,7 +316,7 @@ def robot_control(q1, q2, q3, q4, q5, q6, x_line, y_line, z_line):
                     if q1.qsize() > 0:
                         x1 = x_divide(q1.get()[0], x_line)
                         y1 = y_divide(q1.get()[1], y_line)
-                        # y1이 특정값보다 작으면(아마 가까우면) 로봇 자세가 살짝 달라짐
+                        
                         if y1 < 0.2:
                             indy.task_move_to([0.3 - x1, 0.26 + y1, z,
                                                6.8, -171.09, 48.43])
@@ -340,7 +340,7 @@ def robot_control(q1, q2, q3, q4, q5, q6, x_line, y_line, z_line):
                     y = indy.get_task_pos()[1]
                     if q2.qsize() > 0:
                         z1 = z_divide(q2.get()[0], z_line)
-                        # y < 0.46이면 (상단 위치?), z 이동 제한
+                        
                         if y < 0.46:
                             if z1 > 0.3:
                                 indy.task_move_to([x, y, 0.16,
